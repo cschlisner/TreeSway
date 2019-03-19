@@ -59,7 +59,7 @@ sudo chmod +x /usr/local/bin/rmate
 
 `<HOSTNAME>` is "raspberrypi0" for the reciever raspberry pi and "raspberrypi1" for the sender. 
 
-### via Bluetooth
+### via Bluetooth (currently not working)
 1. Boot the pi
 2. turn on bluetooth
 3. `ls /dev/cu.*` to look for the pi
