@@ -137,7 +137,7 @@ class TreeLogger():
 
 		print("sending primary cache data")
 		# send primary cache data over RF until everything is sent
-		self.network.send(self.cache_primary.dataset)
+		self.network.uploadftp(self.cache_primary.name)
 
 		print("killing cache thread")
 		# stop the accelerometer reading
@@ -158,3 +158,7 @@ class TreeLogger():
 		self.accel_reader = CacheThread(self.cache_primary, self.ACC_PORT)
 		self.accel_reader.start()
 		# self.accel_reader.join()
+
+		# wait 2 mins and transmit 
+		sleep(120)
+		self.change_mode(Mode.TRANSMIT)
