@@ -1,7 +1,8 @@
-import os
+import os, sys
 import re
 import socket
 import csv
+import serial
 from time import sleep
 import threading
 from enum import Enum
@@ -29,19 +30,32 @@ class CacheThread(threading.Thread):
 		self.cache = cache
 		self.input = inputdev
 		self.stopped = False
-
+	
+	def readLine(self, ser):
+		buf = b''
+		data = ser.readline()
+		if data.__len__() > 0:
+			buf += data
+			if b'\n' in buf and buf[0] < 0x80:
+				return buf[:-2].decode()
+		return ""
+		
 	def kill(self):
 		self.stopped=True
 
 	def run(self):
+		# serial set up
+		port = serial.Serial(self.input, baudrate=115200, timeout=3.0)
+		port.nonblocking()
+		port.write('x\r\n'.encode()) # reset device
+		port.write('--\r\n'.encode()) # halve sample rate
+		for i in range(9):
+			port.readline() # get rid of info lines
+			
 		csvfile = self.cache.begin_write()
 		writer = csv.writer(csvfile, delimiter=CSVCache.ROW_DELIM)
-		with open(self.input, 'rb') as instream:
-			while self.stopped == False:
-				# write all supplied data (rows) to the cache file
-				writer.writerow(list(map(lambda x: str(x), instream.read(4))))
-				# delay (simulate reading rate)
-				sleep(1/12)
+		while self.stopped == False:
+			writer.writerow(self.readLine(port).split(","))
 		self.cache.end_write()
 
 """
@@ -53,16 +67,18 @@ class TreeLogger():
 	"""
 	Accelerometer Info
 	"""
-	ACC_NAME = "cp210x"
-	ACC_REGEX = re.compile("^.*cp210x converter now attached.*$")
+	
 	def find_acc_port(self):
+		ACC_NAME = "cp210x"
+		ACC_REGEX = re.compile("^.*cp210x converter now attached.*$")
 		try:
 			syslog = open("/var/log/syslog")
 			for line in syslog:
 				if ACC_REGEX.match(line):
 					print("FOUND ACCELEROMETER AT: "+line.split(" ")[-1])
 					return "/dev/%s"%line.split(" ")[-1].strip()
-		except: 
+		except Exception as e:
+			print(e) 
 			return "/dev/urandom"
 
 	def __init__(self, name=socket.gethostname()):
@@ -75,10 +91,19 @@ class TreeLogger():
 		self.network = NetTransmitter()
 		self.ACC_PORT = self.find_acc_port()
 		self.accel_reader = None
-
+	
+	
+		
 	def start(self,mode=Mode.CACHE):
+		
+		
+		#port.write('c\r\n'.encode()) # get config
+		#print(self.readLine(port))
+		#port.write('s\r\n'.encode()) # get status
+		#print(self.readLine(port))
+		
 		self.change_mode(mode)
-
+		
 	def stop(self):
 		self.accel_reader.kill()
 
