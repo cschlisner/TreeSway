@@ -9,10 +9,10 @@ class NetTransmitter():
 		self.tcp_port=5005
 		self.ip=ip
 
-	def uploadftp(self, cache):
+	def uploadftp(self, cache, name):
 		session = ftplib.FTP('167.99.161.157','treeftp','treelogger')
 		file = open(cache,'rb')                
-		session.storbinary('STOR %s'%cache.split("/")[-1], file) 
+		session.storbinary('STOR %s.csv'%name, file) 
 		file.close()                                   
 		session.quit()
 

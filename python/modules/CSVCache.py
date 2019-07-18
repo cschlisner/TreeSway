@@ -17,6 +17,7 @@ class CSVCache():
 	ROW_DELIM = " "
 
 	def __init__(self, lock, name="TreeSwayCache.csv", directory="log/"):
+		self.time="0"
 		self.name=directory+name
 		self.dataset = []
 		self.lock = lock
@@ -44,6 +45,11 @@ class CSVCache():
 
 		# release the lock so other threads can use cache
 		self.lock.release()
+
+	def empty(self):
+		# empty the cache
+		f = open(self.name, "w+")
+		f.close()
 
 	"""
 	Get lock on CSV file for writing, returns opened file

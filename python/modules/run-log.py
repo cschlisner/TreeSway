@@ -1,5 +1,6 @@
 from TreeLogger import TreeLogger, Mode
 import binary
+
 logger = TreeLogger(name="logger1")
 
 logger.start()

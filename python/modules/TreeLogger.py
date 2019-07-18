@@ -47,6 +47,10 @@ class CacheThread(threading.Thread):
 		# serial set up
 		port = serial.Serial(self.input, baudrate=115200, timeout=3.0)
 		port.nonblocking()
+
+		# store beginning time
+		self.cache.time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
 		port.write('x\r\n'.encode()) # reset device
 		port.write('--\r\n'.encode()) # halve sample rate
 		for i in range(9):
@@ -57,6 +61,8 @@ class CacheThread(threading.Thread):
 		while self.stopped == False:
 			writer.writerow(self.readLine(port).split(","))
 		self.cache.end_write()
+		port.flush()
+		port.close()
 
 """
 Chaches and trasmits accelerometer data depending on the current operating mode. 
@@ -131,13 +137,16 @@ class TreeLogger():
 		self.accel_reader = CacheThread(self.cache_secondary, self.ACC_PORT)
 		self.accel_reader.start()
 
-		print("reading primary cache")
+		# print("reading primary cache")
 		# load all data from primary cache into memory (expensive, may be problematic)
-		self.cache_primary.read()
+		# self.cache_primary.read()
 
 		print("sending primary cache data")
 		# send primary cache data over RF until everything is sent
-		self.network.uploadftp(self.cache_primary.name)
+		self.network.uploadftp(self.cache_primary.name, self.cache_primary.time)
+
+		print("emptying cache")
+		self.cache_primary.empty()
 
 		print("killing cache thread")
 		# stop the accelerometer reading
