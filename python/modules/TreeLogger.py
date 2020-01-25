@@ -48,16 +48,16 @@ class CacheThread(threading.Thread):
 		port = serial.Serial(self.input, baudrate=115200, timeout=3.0)
 		port.nonblocking()
 
-		# store beginning time
-		self.cache.time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
 		port.write('x\r\n'.encode()) # reset device
 		port.write('--\r\n'.encode()) # halve sample rate
 		for i in range(9):
 			port.readline() # get rid of info lines
-			
+		
 		csvfile = self.cache.begin_write()
 		writer = csv.writer(csvfile, delimiter=CSVCache.ROW_DELIM)
+		
+		# store beginning time
+		self.cache.time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 		while self.stopped == False:
 			writer.writerow(self.readLine(port).split(","))
 		self.cache.end_write()

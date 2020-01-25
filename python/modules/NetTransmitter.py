@@ -5,12 +5,17 @@ from CSVCache import CSVCache
 import ftplib
 
 class NetTransmitter():
-	def __init__(self, ip='127.0.0.1', port=5005):
-		self.tcp_port=5005
+	def __init__(self, ip='167.99.161.157', port_tcp=5005, port_ftp=21):
+		self.tcp_port=port_tcp
+		self.ftp_port=port_ftp
 		self.ip=ip
 
+	"""
+	upload file to ftp server
+	"""
 	def uploadftp(self, cache, name):
-		session = ftplib.FTP('167.99.161.157','treeftp','treelogger')
+		session = ftplib.FTP(self.ip, 'treelogger', 'treesway')
+		# session.login()
 		file = open(cache,'rb')                
 		session.storbinary('STOR %s.csv'%name, file) 
 		file.close()                                   

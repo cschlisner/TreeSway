@@ -1,7 +1,7 @@
 import csv 
 import threading
 import os
-
+import datetime as dt
 
 """
 Class for caching accelerometer data. 
@@ -17,7 +17,8 @@ class CSVCache():
 	ROW_DELIM = " "
 
 	def __init__(self, lock, name="TreeSwayCache.csv", directory="log/"):
-		self.time="0"
+		self.writeBeginTime = None
+		self.writeTimeSpan="0"
 		self.name=directory+name
 		self.dataset = []
 		self.lock = lock
@@ -65,3 +66,16 @@ class CSVCache():
 		# release the lock so other threads can use cache
 		self.csvfile.close()
 		self.lock.release()
+	
+	def log_time(self):
+		if (self.writeBeginTime==None):
+			self.writeBeginTime = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S%f__")
+			return
+		self.writeTimeSpan= self.writeBeginTime+dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S%f")
+		self.writeBeginTime = None
+
+	def write_data(self, rows):
+		csvf = self.begin_write()
+		writer = csv.writer(csvf, delimiter=self.ROW_DELIM)
+		writer.writerows(rows)
+		self.end_write()
