@@ -1,0 +1,7 @@
+ctrl_interface=DIR=/var/run/wpa/_supplicant GROUP=netdev
+update_config=1
+
+network={
+	ssid="UCB Guest"
+	key_mgmt=NONE
+}
