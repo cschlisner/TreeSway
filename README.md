@@ -68,3 +68,11 @@ sudo chmod +x /usr/local/bin/rmate
 ## Other useful things
 
 Tmux -- https://www.hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/ (installed on linux systems, available on homebrew for macos)
+
+
+## Dependencies 
+
+- PySerial (pip install pyserial) -- *DO NOT INSTALL "serial"*
+- PyUSB (pip install pyusb)
+
+
