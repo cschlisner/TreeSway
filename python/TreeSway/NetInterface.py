@@ -9,17 +9,20 @@ class FTPNet:
 	def __init__(self, ip='localhost', port=21, config=None):
 		self.ip = ip
 		self.port = port
+		self.user = "User"
+		self.passwd = "Password"
 
 		if config is not None:
 			self.ip = config['ip']
 			self.port = config['port']
+			self.user = config['user']
+			self.passwd = config['pass']
 
 	"""
 	upload file to ftp server
 	"""
 	def upload(self, cache, name):
-		session = ftplib.FTP(self.ip, 'treelogger', 'treesway')
-		# session.login()
+		session = ftplib.FTP(self.ip, self.user, self.passwd)
 		file = open(cache,'rb')                
 		session.storbinary('STOR %s.csv'%name, file) 
 		file.close()                                   
