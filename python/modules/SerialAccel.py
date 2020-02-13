@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 import sys,math,serial,os
 
-class SerialAccel:
+class SerialAccel():
 
-	def readLine(self, ser):
-		str=""
-		while 1:
-			ch=ser.read()
-			if(ch == '\r' or ch == '\n'):
-				break
-			str += ch
-		return str
+	def readLine(self):
+		buf = b''
+		data = self.port.readline()
+		if data.__len__() > 0:
+			buf += data
+			if b'\n' in buf and buf[0] < 0x80:
+				return buf[:-2].decode()
+		return ""
 
 	def findChar(self, str,look):
 		i = 0
@@ -21,30 +21,38 @@ class SerialAccel:
 		return 0
 		
 				
-	def setSample(self):
-	#setup serial port
-		i = 1
-		port = serial.Serial("/dev/ttyUSB0", baudrate=115200, timeout=3.0)
-		port.nonblocking()
-		port.write('x\r\n')
-		r = self.readLine(port)
-		while i == 1:
-			while self.findChar(r,';') == 1:
-				r = self.readLine(port)
-			r = self.readLine(port)
-			if self.findChar(r,';') != 1:
-				break
-			r = self.readLine(port)
-
-		os.system('echo ++  >> /dev/ttyUSB0')
-		r = self.readLine(port)
-		r = self.readLine(port)
-		port.flush()
-		port.close()
-
 	def clean(self, string):
 		sep = '='
 		string = string.strip('\r\n')
 		string = string.split(sep)
 		string = string[1]
 		return string
+
+	def __init__(self, loc="/dev/tty.SLAB_USBtoUART"):
+		
+		
+		self.port = serial.Serial(loc, baudrate=115200, timeout=3.0)
+		self.port.nonblocking()
+
+		self.port.write("x\r\n".encode())
+		r = self.readLine()
+		
+		i = 1
+		while i == 1:
+			while self.findChar(r,';') == 1:
+				r = self.readLine()
+			r = self.readLine()
+			if self.findChar(r,';') != 1:
+				break
+			r = self.readLine()
+
+		os.system("echo ++  >> %s"%loc)
+		r = self.readLine()
+		r = self.readLine()
+		
+		self.port.flush()
+
+	def close(self):
+		self.port.close()
+
+	
