@@ -6,10 +6,13 @@ import serial
 from time import sleep
 import threading
 from enum import Enum
+import logging
 
 from CSVCache import CSVCache
 # from TreeTransmitter import TreeTransmitter
 from NetTransmitter import NetTransmitter
+
+log = logging.getLogger(__name__)
 
 """
 State of data logger 
@@ -81,10 +84,10 @@ class TreeLogger():
 			syslog = open("/var/log/syslog")
 			for line in syslog:
 				if ACC_REGEX.match(line):
-					print("FOUND ACCELEROMETER AT: "+line.split(" ")[-1])
+					log.info("FOUND ACCELEROMETER AT: "+line.split(" ")[-1])
 					return "/dev/%s"%line.split(" ")[-1].strip()
 		except Exception as e:
-			print(e) 
+			log.info(e) 
 			return "/dev/urandom"
 
 	def __init__(self, name=socket.gethostname()):
@@ -104,9 +107,9 @@ class TreeLogger():
 		
 		
 		#port.write('c\r\n'.encode()) # get config
-		#print(self.readLine(port))
+		#log.info(self.readLine(port))
 		#port.write('s\r\n'.encode()) # get status
-		#print(self.readLine(port))
+		#log.info(self.readLine(port))
 		
 		self.change_mode(mode)
 		
@@ -120,39 +123,39 @@ class TreeLogger():
 	def change_mode(self, mode):
 		self.opmode = mode
 		if mode==Mode.TRANSMIT:
-			print("-- TRANSMITTING --")
+			log.info("-- TRANSMITTING --")
 			self.transmit()
 		elif mode==Mode.CACHE:
-			print("-- CACHING --")
+			log.info("-- CACHING --")
 			self.cache()
 
 	def transmit(self):
 		# kill acceleromter logging to primary cache
 		if self.accel_reader is not None:
-			print("killing cache thread")
+			log.info("killing cache thread")
 			self.accel_reader.kill()
 		
-		print("starting new cache thread")
+		log.info("starting new cache thread")
 		# start acceleromter logging to secondary cache
 		self.accel_reader = CacheThread(self.cache_secondary, self.ACC_PORT)
 		self.accel_reader.start()
 
-		# print("reading primary cache")
+		# log.info("reading primary cache")
 		# load all data from primary cache into memory (expensive, may be problematic)
 		# self.cache_primary.read()
 
-		print("sending primary cache data")
+		log.info("sending primary cache data")
 		# send primary cache data over RF until everything is sent
 		self.network.uploadftp(self.cache_primary.name, self.cache_primary.time)
 
-		print("emptying cache")
+		log.info("emptying cache")
 		self.cache_primary.empty()
 
-		print("killing cache thread")
+		log.info("killing cache thread")
 		# stop the accelerometer reading
 		self.accel_reader.kill()
 
-		print("swapping cache data")
+		log.info("swapping cache data")
 		# All data from primary cache is now sent, swap the secondary and primary caches
 		cache_p_name = self.cache_primary.name
 		self.cache_primary.name = self.cache_secondary.name
@@ -162,7 +165,7 @@ class TreeLogger():
 		self.change_mode(Mode.CACHE)
 
 	def cache(self):
-		print("starting new cache thread")
+		log.info("starting new cache thread")
 		# start reading accelerometer data into primary cache
 		self.accel_reader = CacheThread(self.cache_primary, self.ACC_PORT)
 		self.accel_reader.start()

@@ -3,7 +3,7 @@ import sys,math,serial,os
 
 class SerialAccel:
 
-	def readLine(ser):
+	def readLine(self, ser):
 		str=""
 		while 1:
 			ch=ser.read()
@@ -12,7 +12,7 @@ class SerialAccel:
 			str += ch
 		return str
 
-	def findChar(str,look):
+	def findChar(self, str,look):
 		i = 0
 		while i < len(str) - 1:
 			if(str[i] == look):
@@ -21,28 +21,28 @@ class SerialAccel:
 		return 0
 		
 				
-	def setSample():
+	def setSample(self):
 	#setup serial port
 		i = 1
 		port = serial.Serial("/dev/ttyUSB0", baudrate=115200, timeout=3.0)
 		port.nonblocking()
 		port.write('x\r\n')
-		r = readLine(port)
+		r = self.readLine(port)
 		while i == 1:
-			while findChar(r,';') == 1:
-				r = readLine(port)
-			r = readLine(port)
-			if findChar(r,';') != 1:
+			while self.findChar(r,';') == 1:
+				r = self.readLine(port)
+			r = self.readLine(port)
+			if self.findChar(r,';') != 1:
 				break
-			r = readLine(port)
+			r = self.readLine(port)
 
 		os.system('echo ++  >> /dev/ttyUSB0')
-		r = readLine(port)
-		r = readLine(port)
+		r = self.readLine(port)
+		r = self.readLine(port)
 		port.flush()
 		port.close()
 
-	def clean(string):
+	def clean(self, string):
 		sep = '='
 		string = string.strip('\r\n')
 		string = string.split(sep)
