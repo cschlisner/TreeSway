@@ -1,0 +1,28 @@
+{
+    "network":{
+        "live":{
+            "ftp":{
+                "port":21,
+                "ip":"167.99.161.157"
+            },
+            "tcp":{
+                "port":5005,
+                "ip":"167.99.161.157"
+            }
+        }, 
+        "debug":{
+            "ftp":{
+                "port":21,
+                "ip":"localhost"
+            },
+            "tcp":{
+                "port":5005,
+                "ip":"localhost"
+            }
+        }
+    }, 
+    "accelerometer":{
+        "samplerate": 50,
+        "microresolution": true
+    }   
+}
