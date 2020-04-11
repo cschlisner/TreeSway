@@ -3,7 +3,7 @@
         "live":{
             "ftp":{
                 "port":21,
-                "ip":"167.99.161.157",
+                "ip":"167.172.198.79",
                 "user":"treelogger",
                 "pass":"treesway"
             },
@@ -15,9 +15,9 @@
         "debug":{
             "ftp":{
                 "port":21,
-                "ip":"localhost",
+                "ip":"167.172.198.79",
                 "user":"treelogger",
-                "pass":"treesway"
+                "pass":"treesway4$"
             },
             "tcp":{
                 "port":5005,
